@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "autopaterns",
+  "version": "${version}",
+  "name": "AutoPaterns",
+  "description": "Enregistre et rejoue les actions du joueur tick par tick : checkpoints, contrôle des blocs, remplacement des items cassés, vente et corbeille automatiques, pêche automatique, waypoints et surbrillance de blocs, HUD modulaire, mode performance. O : menu.",
+  "authors": ["Ratatouille"],
+  "license": "All-Rights-Reserved",
+  "icon": "assets/autopaterns/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["fr.autopaterns.core.AutoPaternsClient"]
+  },
+  "mixins": [
+    { "config": "autopaterns.mixins.json", "environment": "client" }
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": "~26.2",
+    "java": ">=25",
+    "fabric-api": "*"
+  }
+}

@@ -1,0 +1,101 @@
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+}
+
+version = "${project.mod_version}+${project.minecraft_version}"
+group = project.maven_group
+
+base {
+	archivesName = project.archives_base_name
+}
+
+repositories {
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+}
+
+processResources {
+	def version = project.mod_version
+	inputs.property "version", version
+	filesMatching("fabric.mod.json") {
+		expand "version": version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 25
+	it.options.encoding = "UTF-8"
+	it.options.compilerArgs += ["-Xlint:deprecation", "-Xlint:unchecked", "-Xmaxerrs", "2000"]
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+}
+
+// ---------------------------------------------------------------------------------------------
+// Fusion des ressources découpées par module :
+//  - assets/autopaterns/lang/parts/<module>.<langue>.json  →  assets/autopaterns/lang/<langue>.json
+//  - mixin-parts/<module>.txt (un nom de classe par ligne)  →  autopaterns.mixins.json
+// Une clé de langue en double (valeurs différentes) ou absente dans l'autre langue arrête la compilation.
+// ---------------------------------------------------------------------------------------------
+def generatedRes = layout.buildDirectory.dir("generated/autopaterns-resources")
+def langPartsDir = file("src/main/resources/assets/autopaterns/lang/parts")
+def mixinPartsDir = file("src/main/resources/mixin-parts")
+
+tasks.register("mergeAutopaternsResources") {
+	inputs.dir(langPartsDir)
+	inputs.dir(mixinPartsDir)
+	outputs.dir(generatedRes)
+	doLast {
+		def out = generatedRes.get().asFile
+		def langs = ['fr_fr', 'en_us']
+		def mergedByLang = [:]
+		langs.each { lang ->
+			def merged = new TreeMap()
+			langPartsDir.listFiles().findAll { it.name.endsWith(".${lang}.json") }.sort { it.name }.each { f ->
+				def m = new groovy.json.JsonSlurper().parse(f, 'UTF-8')
+				m.each { k, v ->
+					if (merged.containsKey(k) && merged[k] != v) {
+						throw new GradleException("Clé de langue en double avec des valeurs différentes : ${k} (${f.name})")
+					}
+					merged[k] = v
+				}
+			}
+			mergedByLang[lang] = merged
+			def target = new File(out, "assets/autopaterns/lang/${lang}.json")
+			target.parentFile.mkdirs()
+			target.setText(groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(merged)), 'UTF-8')
+		}
+		def frKeys = mergedByLang['fr_fr'].keySet()
+		def enKeys = mergedByLang['en_us'].keySet()
+		def missingEn = frKeys - enKeys
+		def missingFr = enKeys - frKeys
+		if (!missingEn.isEmpty() || !missingFr.isEmpty()) {
+			throw new GradleException("Traductions incomplètes. Absentes en anglais : ${missingEn} ; absentes en français : ${missingFr}")
+		}
+		def mixins = new TreeSet()
+		mixinPartsDir.listFiles().findAll { it.name.endsWith('.txt') }.each { f ->
+			f.readLines('UTF-8').collect { it.trim() }.findAll { it && !it.startsWith('#') }.each { mixins << it }
+		}
+		def cfg = [
+			required          : true,
+			minVersion        : "0.8",
+			package           : "fr.autopaterns.mixin",
+			compatibilityLevel: "JAVA_25",
+			client            : mixins as List,
+			injectors         : [defaultRequire: 0]
+		]
+		new File(out, "autopaterns.mixins.json").setText(groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(cfg)), 'UTF-8')
+	}
+}
+
+processResources {
+	dependsOn "mergeAutopaternsResources"
+	from(generatedRes)
+	exclude 'assets/autopaterns/lang/parts/**', 'mixin-parts/**'
+}
