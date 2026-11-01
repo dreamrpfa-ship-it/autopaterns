@@ -1,0 +1,17 @@
+#AutoPaterns
+#Sun Nov 01 16:18:14 UTC 2026
+backgroundFps=60
+fishClean=true
+fishClicks=10
+fishDiag=false
+fishGpu=true
+fishLead=6
+fishRecast=20
+fishWait=60
+performance=true
+performance.fpsMax=120
+performance.optimizations=renderDistance,particles,clouds,ao,entityShadows,transparency,biomeBlend,entityDistance,vignette,chunkFade,packs,shaders,priority
+performance.particles=2
+performance.profile=MAXIMUM
+performance.renderDistance=6
+performance.simulationDistance=5
