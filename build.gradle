@@ -18,6 +18,23 @@ dependencies {
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 }
 
+fabricApi {
+	configureTests {
+		createSourceSet = true
+		modId = "autopaterns-gametest"
+		enableGameTests = false
+		enableClientGameTests = true
+		eula = true // tests automatiques uniquement : acceptation de l'EULA Minecraft pour le client de test
+	}
+}
+
+// Tests en jeu sur un vrai client (GitHub Actions, écran virtuel Xvfb)
+tasks.register("runProductionClientGameTest", net.fabricmc.loom.task.prod.ClientProductionRunTask) {
+	jvmArgs.add("-Dfabric.client.gametest")
+	jvmArgs.add("-Dfabric.client.gametest.disableNetworkSynchronizer=true")
+	useXVFB = true
+}
+
 processResources {
 	def version = project.mod_version
 	inputs.property "version", version

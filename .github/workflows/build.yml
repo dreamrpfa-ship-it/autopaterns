@@ -2,11 +2,15 @@ name: build
 
 on:
   push:
+    branches: [main]
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -25,16 +29,38 @@ jobs:
           ./gradlew build --stacktrace --no-daemon 2>&1 | tee build-log.txt
           exit ${PIPESTATUS[0]}
 
-      - name: Journal de compilation
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-log
-          path: build-log.txt
+      - name: Contenu du JAR
+        run: |
+          for j in build/libs/*.jar; do echo "== $j"; unzip -l "$j"; done
 
-      - name: JAR
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: autopaterns-jar
-          path: build/libs/*.jar
+      - name: Xvfb
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq xvfb > /dev/null
+
+      - name: Tests en jeu (client Minecraft réel)
+        id: gametest
+        continue-on-error: true
+        timeout-minutes: 25
+        run: |
+          ./gradlew runProductionClientGameTest --stacktrace --no-daemon 2>&1 | tee gametest-log.txt
+          exit ${PIPESTATUS[0]}
+
+      - name: Publication (branche dist)
+        if: always()
+        run: |
+          set -x
+          rm -rf /tmp/dist && mkdir -p /tmp/dist
+          cp build/libs/*.jar /tmp/dist/ 2>/dev/null || true
+          cp build-log.txt gametest-log.txt /tmp/dist/ 2>/dev/null || true
+          R=build/run/clientGameTest
+          [ -d "$R/screenshots" ] && cp -r "$R/screenshots" /tmp/dist/screenshots || true
+          [ -d "$R/logs" ] && mkdir -p /tmp/dist/game-logs && cp "$R"/logs/*.log /tmp/dist/game-logs/ 2>/dev/null || true
+          [ -d "$R/autopaterns" ] && cp -r "$R/autopaterns" /tmp/dist/autopaterns-files || true
+          echo "${{ steps.gametest.outcome }}" > /tmp/dist/gametest-outcome.txt
+          echo "${GITHUB_SHA}" > /tmp/dist/commit.txt
+          cd /tmp/dist
+          git init -q -b dist
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Build ${GITHUB_SHA}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" dist

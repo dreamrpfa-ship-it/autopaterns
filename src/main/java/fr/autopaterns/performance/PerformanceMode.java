@@ -493,6 +493,7 @@ public final class PerformanceMode implements ClientModule {
 		LinkedHashMap<String, String> keep = new LinkedHashMap<>();
 		List<String> failed = new ArrayList<>();
 		int restored = 0;
+		lastProblem = null;
 		if (o == null) {
 			for (Map.Entry<String, String> e : entries.entrySet()) {
 				if (!PerfBackup.PACKS.equals(e.getKey()) && !PerfBackup.SHADERS.equals(e.getKey())) keep.put(e.getKey(), e.getValue());
@@ -560,19 +561,12 @@ public final class PerformanceMode implements ClientModule {
 	}
 
 	private int restoreOne(Options o, String key, String value, Map<String, String> keep, List<String> failed) {
-		switch (restoreOption(o, key, value)) {
-			case RESTORED -> {
-				return 1;
-			}
-			case FAILED -> {
-				failed.add(key);
-				keep.put(key, value);
-				return 0;
-			}
-			default -> {
-				return 0;
-			}
+		Outcome r = restoreOption(o, key, value);
+		if (r == Outcome.FAILED) {
+			failed.add(key);
+			keep.put(key, value);
 		}
+		return r == Outcome.RESTORED ? 1 : 0;
 	}
 
 	/** 2.x {@code restoreOptions} pour une entrée : décodée selon le type actuel, écrite si différente, vérifiée. */
