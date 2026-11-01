@@ -33,8 +33,13 @@ jobs:
         run: |
           for j in build/libs/*.jar; do echo "== $j"; unzip -l "$j"; done
 
-      - name: Xvfb
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq xvfb > /dev/null
+      - name: Xvfb et pilotes graphiques logiciels
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb mesa-vulkan-drivers libgl1-mesa-dri libglx-mesa0 > /dev/null
+          mkdir -p build/run/clientGameTest
+          echo "eula=true" > build/run/clientGameTest/eula.txt
+          printf 'version:4896\npreferredGraphicsBackend:"opengl"\n' > build/run/clientGameTest/options.txt
 
       - name: Tests en jeu (client Minecraft réel)
         id: gametest

@@ -49,6 +49,7 @@ tasks.register("runProductionClientGameTest", net.fabricmc.loom.task.prod.Client
 	mods.from(gametestJar)
 	jvmArgs.add("-Dfabric.client.gametest")
 	jvmArgs.add("-Dfabric.client.gametest.disableNetworkSynchronizer=true")
+	runDir = file("build/run/clientGameTest")
 	useXVFB = true
 }
 

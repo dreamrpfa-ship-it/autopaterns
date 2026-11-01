@@ -15,7 +15,7 @@
  "autopaterns.performance.profile.performance": "Performance",
  "autopaterns.performance.profile.performance.desc": "Balanced + minimal particles, smooth lighting, transparency, biome blend, entities 50 %%; distance ≤ 8; shaders off.",
  "autopaterns.performance.profile.maximum": "Maximum",
- "autopaterns.performance.profile.maximum.desc": "Full 2.x performance mode: 11 settings, distance ≤ 6, shaders and resource packs off, high priority.",
+ "autopaterns.performance.profile.maximum.desc": "Full 2.x performance mode: 10 graphics settings, distance ≤ 6, shaders and resource packs off, high priority.",
  "autopaterns.performance.profile.custom": "Custom",
  "autopaterns.performance.profile.custom.desc": "Your own selection of optimisations.",
  "autopaterns.performance.section.state": "Status",

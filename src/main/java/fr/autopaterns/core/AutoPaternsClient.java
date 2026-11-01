@@ -36,7 +36,7 @@ public final class AutoPaternsClient implements ClientModInitializer {
 					Log.error("initialisation de " + m.name() + " incomplète", e);
 				}
 			}
-			Log.info("AutoPaterns " + VERSION + " chargé (menu : " + Keys.label(fr.autopaterns.input.KeyDef.MENU) + ").");
+			Log.info("AutoPaterns " + VERSION + " chargé.");
 		} catch (VirtualMachineError e) {
 			throw e;
 		} catch (Throwable t) {

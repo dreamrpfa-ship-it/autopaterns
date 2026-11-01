@@ -14,7 +14,7 @@ import fr.autopaterns.core.Texts;
  *       d'entités, vignette, fondu des chunks), distance de rendu ≤ 10, priorité haute.</li>
  *   <li><b>Performance</b> : Équilibré + particules minimales, occlusion ambiante, transparence améliorée, mélange des
  *       biomes, distance des entités 50 %, distance de rendu ≤ 8, shaders coupés.</li>
- *   <li><b>Maximum</b> : exactement le mode performance 2.x (11 réglages, distance ≤ 6, shaders et packs de
+ *   <li><b>Maximum</b> : exactement le mode performance 2.x (10 réglages graphiques modifiés + préréglage mémorisé, distance ≤ 6, shaders et packs de
  *       ressources coupés, priorité haute).</li>
  *   <li><b>Personnalisé</b> : choix libre (dès qu'une optimisation est modifiée à la main).</li>
  * </ul>
