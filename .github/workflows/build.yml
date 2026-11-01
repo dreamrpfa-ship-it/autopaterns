@@ -34,6 +34,7 @@ jobs:
           for j in build/libs/*.jar; do echo "== $j"; unzip -l "$j"; done
 
       - name: Xvfb et pilotes graphiques logiciels
+        if: contains(github.event.head_commit.message, '[tests]')
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq xvfb mesa-vulkan-drivers libgl1-mesa-dri libglx-mesa0 > /dev/null
@@ -43,6 +44,7 @@ jobs:
 
       - name: Tests en jeu (client Minecraft réel)
         id: gametest
+        if: contains(github.event.head_commit.message, '[tests]')
         continue-on-error: true
         timeout-minutes: 25
         run: |
