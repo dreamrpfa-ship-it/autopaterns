@@ -72,12 +72,14 @@ final class GraphicsOptions {
 		((OptionInstance<Object>) opt).set(v);
 	}
 
-	/** Applique le préréglage graphique nommé (FAST…) ; true si la valeur a changé. */
+	/**
+	 * Applique le préréglage graphique nommé (FAST…) : valeur de l'option puis application de ses réglages.
+	 * Renvoie true si le préréglage vaut bien {@code name} ensuite. IllegalArgumentException si la constante n'existe pas.
+	 */
 	static boolean applyPreset(Options o, String name) {
 		var opt = o.graphicsPreset();
 		var cur = opt.get();
 		var target = Enum.valueOf(cur.getDeclaringClass(), name);
-		if (target == cur) return false;
 		opt.set(target);
 		o.applyGraphicsPreset(target);
 		return opt.get() == target;

@@ -19,8 +19,8 @@ public final class AutoPaternsClient implements ClientModInitializer {
 		try {
 			Keys.register();
 			AutoPaterns ap = AutoPaterns.create();
-			ClientTickEvents.START_CLIENT_TICK.register(mc -> Guard.run("début de tick", () -> ap.automation().onStartTick(mc)));
-			ClientTickEvents.END_CLIENT_TICK.register(mc -> Guard.run("fin de tick", () -> ap.automation().onEndTick(mc)));
+			ClientTickEvents.START_CLIENT_TICK.register(mc -> Guard.run("début de tick", () -> ap.automation().startTick(mc)));
+			ClientTickEvents.END_CLIENT_TICK.register(mc -> Guard.run("fin de tick", () -> ap.automation().endTick(mc)));
 			ClientLifecycleEvents.CLIENT_STOPPING.register(mc -> {
 				for (ClientModule m : ap.modules()) Guard.runAlways("fermeture de " + m.name(), () -> m.onStopping(mc));
 			});

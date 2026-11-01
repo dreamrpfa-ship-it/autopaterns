@@ -102,7 +102,7 @@ public final class Automation implements ClientModule {
 	}
 
 	/** START_CLIENT_TICK. */
-	void onStartTick(Minecraft mc) {
+	void startTick(Minecraft mc) {
 		LocalPlayer p = mc.player;
 		if (p == null) {
 			if (phase != Phase.IDLE) stopAll(mc, null);
@@ -125,7 +125,7 @@ public final class Automation implements ClientModule {
 	}
 
 	/** END_CLIENT_TICK. */
-	void onEndTick(Minecraft mc) {
+	void endTick(Minecraft mc) {
 		AutoPaterns ap = AutoPaterns.get();
 		ap.loadOnce(mc);
 		Keys.tick();
