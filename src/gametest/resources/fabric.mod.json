@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "autopaterns-gametest",
+  "version": "1.0.0",
+  "name": "AutoPaterns - tests en jeu",
+  "description": "Tests automatiques d'AutoPaterns sur un vrai client (Fabric client game tests).",
+  "license": "All-Rights-Reserved",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-client-gametest": [
+      "fr.autopaterns.test.AutoPaternsClientGameTest"
+    ]
+  },
+  "depends": {
+    "autopaterns": "*",
+    "fabric-api": "*"
+  }
+}

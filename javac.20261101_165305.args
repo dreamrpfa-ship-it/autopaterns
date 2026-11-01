@@ -1,0 +1,13 @@
+-proc:none
+-Xmaxerrs
+100000
+-d
+/tmp/claude-0/-home-claude/eaa78dc1-f882-58b9-9ae1-81e6de2451a2/scratchpad/gtc
+-sourcepath
+src/main/java:src/gametest/java
+src/gametest/java/fr/autopaterns/fishing/FishingTestAccess.java
+src/gametest/java/fr/autopaterns/test/TestUtil.java
+src/gametest/java/fr/autopaterns/test/AutoPaternsClientGameTest.java
+src/gametest/java/fr/autopaterns/test/Report.java
+src/gametest/java/fr/autopaterns/test/FormatTests.java
+src/gametest/java/fr/autopaterns/waypoints/WaypointsTestAccess.java

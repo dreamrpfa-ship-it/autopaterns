@@ -1,0 +1,15 @@
+-proc:none
+-XDshould-stop.ifError=FLOW
+-Xmaxerrs
+100000
+-d
+/tmp/claude-0/-home-claude/eaa78dc1-f882-58b9-9ae1-81e6de2451a2/scratchpad/gtc2
+-sourcepath
+/tmp/claude-0/-home-claude/eaa78dc1-f882-58b9-9ae1-81e6de2451a2/scratchpad/gtstubs:src/main/java:/tmp/claude-0/-home-claude/eaa78dc1-f882-58b9-9ae1-81e6de2451a2/scratchpad/gtcopy/java
+/tmp/claude-0/-home-claude/eaa78dc1-f882-58b9-9ae1-81e6de2451a2/scratchpad/gtcopy/java/fr/autopaterns/fishing/FishingTestAccess.java
+/tmp/claude-0/-home-claude/eaa78dc1-f882-58b9-9ae1-81e6de2451a2/scratchpad/gtcopy/java/fr/autopaterns/test/TestUtil.java
+/tmp/claude-0/-home-claude/eaa78dc1-f882-58b9-9ae1-81e6de2451a2/scratchpad/gtcopy/java/fr/autopaterns/test/AutoPaternsClientGameTest.java
+/tmp/claude-0/-home-claude/eaa78dc1-f882-58b9-9ae1-81e6de2451a2/scratchpad/gtcopy/java/fr/autopaterns/test/Bad.java
+/tmp/claude-0/-home-claude/eaa78dc1-f882-58b9-9ae1-81e6de2451a2/scratchpad/gtcopy/java/fr/autopaterns/test/Report.java
+/tmp/claude-0/-home-claude/eaa78dc1-f882-58b9-9ae1-81e6de2451a2/scratchpad/gtcopy/java/fr/autopaterns/test/FormatTests.java
+/tmp/claude-0/-home-claude/eaa78dc1-f882-58b9-9ae1-81e6de2451a2/scratchpad/gtcopy/java/fr/autopaterns/waypoints/WaypointsTestAccess.java
