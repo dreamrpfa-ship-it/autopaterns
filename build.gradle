@@ -29,7 +29,24 @@ fabricApi {
 }
 
 // Tests en jeu sur un vrai client (GitHub Actions, écran virtuel Xvfb)
+configurations {
+	productionRunMods {
+		transitive = false
+	}
+}
+
+dependencies {
+	productionRunMods "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+}
+
+def gametestJar = tasks.register("gametestJar", Jar) {
+	archiveClassifier = "gametest"
+	from sourceSets.gametest.output
+}
+
 tasks.register("runProductionClientGameTest", net.fabricmc.loom.task.prod.ClientProductionRunTask) {
+	mods.from(configurations.productionRunMods)
+	mods.from(gametestJar)
 	jvmArgs.add("-Dfabric.client.gametest")
 	jvmArgs.add("-Dfabric.client.gametest.disableNetworkSynchronizer=true")
 	useXVFB = true
