@@ -70,6 +70,19 @@ L'arrêt d'urgence est traité au début de chaque tick, avant toute action auto
 
 ## Fonctionnalités
 
+### Touches de lancement par pattern (3.1)
+
+Menu PATTERNS → sélectionner un pattern sauvegardé → **⌨ Touche de lancement…** :
+- **Touche** : cliquer puis appuyer sur la touche voulue (clavier uniquement ; Échap annule, Suppr retire) ;
+- **Mode** : *une fois* ou *en boucle* ;
+- les conflits avec d'autres raccourcis (jeu, mods) sont signalés ;
+- une touche ne lance qu'un seul pattern : l'assigner ailleurs la retire du premier.
+
+En jeu, **sans menu ouvert**, la touche charge le pattern puis le lance (recalage, mode performance… comme
+Lecture / Boucle). Si une activité tourne déjà, la touche l'arrête. Les touches sont enregistrées dans
+`config.txt` (`hotkey.<nom>=<code>:<ONCE|LOOP>`) et suivent le renommage / la suppression des patterns ;
+les fichiers `.apt` ne changent pas. La liste des patterns affiche la touche de chacun.
+
 ### Patterns
 - Enregistrement tick par tick : touches, clics brefs et maintenus, emplacement de la barre d'action, rotation,
   position, vitesse, état au sol / sprint. La caméra est enregistrée image par image et rejouée lissée (spline Hermite).
