@@ -41,6 +41,8 @@ public final class PatternEngine implements ClientModule {
 	private final PatternOptions defaultOptions = new PatternOptions();
 	private final Recorder recorder = new Recorder();
 	private final Playback playback = new Playback(this);
+	/** Touches de lancement par pattern (3.1). */
+	private final PatternHotkeys hotkeys = new PatternHotkeys();
 	private int statusTicks;
 
 	public PatternEngine() {
@@ -73,6 +75,7 @@ public final class PatternEngine implements ClientModule {
 
 	@Override
 	public void onLoad(Minecraft mc, Properties config) {
+		hotkeys.load(config);
 		String raw = config.getProperty("current");
 		String name = null;
 		if (raw != null) {
@@ -92,6 +95,39 @@ public final class PatternEngine implements ClientModule {
 	public void saveConfig(Properties config) {
 		if (currentName != null) config.setProperty("current", currentName);
 		else config.remove("current");
+		hotkeys.save(config);
+	}
+
+	/** Fin de chaque tick client : touches de lancement des patterns. */
+	@Override
+	public void onEndTick(Minecraft mc) {
+		String name = hotkeys.poll(mc);
+		if (name != null) launchFromHotkey(mc, name);
+	}
+
+	/**
+	 * Touche de lancement pressée : si rien ne tourne, charge le pattern et le lance (une fois ou en boucle) ;
+	 * si une activité tourne déjà, l'arrête (même comportement que les touches Lecture / Boucle).
+	 */
+	private void launchFromHotkey(Minecraft mc, String name) {
+		PatternHotkeys.Binding b = hotkeys.get(name);
+		if (b == null) return;
+		boolean loop = b.mode() == PatternHotkeys.Mode.LOOP;
+		Automation au = automation();
+		if (au.isBusy()) {
+			au.togglePlayback(mc, loop);
+			return;
+		}
+		if (!name.equals(currentName) || !hasPattern()) {
+			String r = uiLoad(name);
+			if (!r.startsWith("✔")) {
+				Notifier.hud(r);
+				return;
+			}
+		}
+		Log.info("touche " + PatternHotkeys.label(b.key()) + " → pattern « " + name + " » " + (loop ? "en boucle" : "une fois"));
+		Notifier.hud(Msg.t("hotkey.launch", name, modeLabel(b.mode())));
+		au.togglePlayback(mc, loop);
 	}
 
 	@Override
@@ -396,10 +432,9 @@ public final class PatternEngine implements ClientModule {
 		if (s.equals(from)) return Msg.t("ui.rename.same");
 		try {
 			store().rename(from, s);
-			if (from.equals(currentName)) {
-				currentName = s;
-				persistConfig();
-			}
+			if (from.equals(currentName)) currentName = s;
+			hotkeys.rename(from, s);
+			persistConfig();
 			Log.info("pattern « " + from + " » renommé en « " + s + " »");
 			return Msg.t("ui.rename.ok", from, s);
 		} catch (IOException | RuntimeException e) {
@@ -411,10 +446,9 @@ public final class PatternEngine implements ClientModule {
 		if (name == null) return Msg.t("ui.select");
 		try {
 			store().delete(name);
-			if (name.equals(currentName)) {
-				currentName = null; // le pattern reste en mémoire, comme en 2.x
-				persistConfig();
-			}
+			if (name.equals(currentName)) currentName = null; // le pattern reste en mémoire, comme en 2.x
+			hotkeys.remove(name);
+			persistConfig();
 			Log.info("pattern « " + name + " » supprimé");
 			return Msg.t("ui.delete.ok", name);
 		} catch (IOException | RuntimeException e) {
@@ -518,6 +552,54 @@ public final class PatternEngine implements ClientModule {
 		} catch (IOException | RuntimeException e) {
 			return Msg.t("ui.options.fail", msg(e));
 		}
+	}
+
+	// ------------------------------------------------------------------ touches de lancement (API des écrans)
+
+	PatternHotkeys.Binding uiHotkey(String name) {
+		return hotkeys.get(name);
+	}
+
+	/** « G · boucle », ou null si aucune touche. */
+	String uiHotkeyLabel(String name) {
+		PatternHotkeys.Binding b = hotkeys.get(name);
+		return b == null ? null : PatternHotkeys.label(b.key()) + " · " + modeLabel(b.mode());
+	}
+
+	java.util.Map<String, PatternHotkeys.Binding> uiHotkeys() {
+		return hotkeys.all();
+	}
+
+	/** Assigne une touche à un pattern sauvegardé ; renvoie le message à afficher. */
+	String uiSetHotkey(String name, int key, PatternHotkeys.Mode mode) {
+		if (name == null || !store().exists(name)) return Msg.t("hotkey.unsaved");
+		String previous = hotkeys.ownerOf(key, name);
+		hotkeys.set(name, key, mode);
+		persistConfig();
+		String label = PatternHotkeys.label(key);
+		Log.info("touche " + label + " assignée au pattern « " + name + " » (" + mode + ")");
+		StringBuilder sb = new StringBuilder(Msg.t("hotkey.set", label, name, modeLabel(mode)));
+		if (previous != null) sb.append(' ').append(Msg.t("hotkey.moved", previous));
+		List<String> c = PatternHotkeys.conflicts(Minecraft.getInstance(), key);
+		if (!c.isEmpty()) sb.insert(0, "§e").append(' ').append(Msg.t("hotkey.conflict", String.join(", ", c)));
+		return sb.toString();
+	}
+
+	String uiSetHotkeyMode(String name, PatternHotkeys.Mode mode) {
+		if (hotkeys.get(name) == null) return null;
+		hotkeys.setMode(name, mode);
+		persistConfig();
+		return Msg.t("hotkey.modeSet", name, modeLabel(mode));
+	}
+
+	String uiClearHotkey(String name) {
+		if (!hotkeys.remove(name)) return Msg.t("hotkey.none");
+		persistConfig();
+		return Msg.t("hotkey.cleared", name);
+	}
+
+	static String modeLabel(PatternHotkeys.Mode mode) {
+		return Msg.t(mode == PatternHotkeys.Mode.LOOP ? "hotkey.mode.loop" : "hotkey.mode.once");
 	}
 
 	static String msg(Throwable e) {

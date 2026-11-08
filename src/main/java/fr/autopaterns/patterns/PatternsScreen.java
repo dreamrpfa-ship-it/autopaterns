@@ -58,7 +58,7 @@ public final class PatternsScreen extends UiScreen {
 	protected int preferredWidth() { return 400; }
 
 	@Override
-	protected int preferredHeight() { return 340; }
+	protected int preferredHeight() { return 364; }
 
 	@Override
 	protected String subtitle() {
@@ -149,6 +149,10 @@ public final class PatternsScreen extends UiScreen {
 		content(new UiButton(x + 2 * (b3 + gap), y, w - 2 * (b3 + gap), bh,
 			() -> selected != null && selected.equals(pendingDelete) ? Msg.t("screen.deleteConfirm") : Msg.t("screen.delete"),
 			this::delete).style(UiButton.Style.DANGER).enabledWhen(() -> selected != null));
+		y += bh + gap;
+		content(new UiButton(x, y, w, bh, this::hotkeyLabel, this::openHotkey)
+			.icon("⌨").enabledWhen(() -> hotkeyTarget() != null && au().phase() != Phase.RECORDING)
+			.tooltip(Msg.t("screen.hotkey.tip")));
 		y += bh + 10;
 
 		// --- partage
@@ -170,6 +174,8 @@ public final class PatternsScreen extends UiScreen {
 			String dur = i.ticks() >= 0 ? Texts.duration(i.ticks()) : "?";
 			String date = DATE.format(Instant.ofEpochMilli(i.modifiedMillis()).atZone(ZoneId.systemDefault()));
 			String sub = Msg.t("screen.row", dur, date, i.bytes() / 1024);
+			String hk = pe().uiHotkeyLabel(i.name());
+			if (hk != null) sub += " · ⌨ " + hk;
 			out.add(new UiList.Row<>(i.name(), (cur ? "▶ " : "") + i.name(), sub, cur ? Theme.CYAN : 0));
 		}
 		return out;
@@ -214,6 +220,22 @@ public final class PatternsScreen extends UiScreen {
 		au().stopAll(minecraft, Msg.t("screen.stopped"));
 		reloadList();
 		refresh();
+	}
+
+	/** Pattern visé par « Touche de lancement » : sélection, sinon pattern courant s'il est sauvegardé. */
+	private String hotkeyTarget() {
+		return selected != null ? selected : pe().currentName();
+	}
+
+	private String hotkeyLabel() {
+		String t = hotkeyTarget();
+		String hk = t == null ? null : pe().uiHotkeyLabel(t);
+		return hk == null ? Msg.t("screen.hotkey") : Msg.t("screen.hotkey.with", hk);
+	}
+
+	private void openHotkey() {
+		String t = hotkeyTarget();
+		if (t != null) minecraft.gui.setScreen(new PatternHotkeyScreen(this, t));
 	}
 
 	private void openOptions() {
